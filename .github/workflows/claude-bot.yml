@@ -1,5 +1,8 @@
 name: PR @claude 自动执行任务
+
 on:
+  push:
+    branches: [main]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -14,23 +17,19 @@ permissions:
 jobs:
   ai-task:
     runs-on: ubuntu-latest
-    if: contains(github.event.comment.body, '@claude')
+    # push 事件直接运行；评论事件需要包含 @claude
+    if: github.event_name == 'push' || contains(github.event.comment.body, '@claude')
     steps:
-      - name: 拉取完整仓库代码
+      - name: 获取完整仓库代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 调用第三方兼容Claude接口
+      - name: 配置环境变量和Claude接口
         uses: anthropics/claude-code-action@v1
         env:
-          # 替换为你的中转API地址
           ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
-          # 仓库Secret命名 MODEL_API_KEY，填入第三方平台key
-          ANTHROPIC_AUTH_TOKEN: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93}}
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.DEEPSEEK_API_KEY }}
         with:
-          # 中转模式必须删除本行！！冲突会直接工作流失效
-          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93 }}
-          # 修改为服务商提供的模型名称
-          model: deepseek-v4-flash
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: deepseek-chat
