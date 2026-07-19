@@ -1,0 +1,44 @@
+# 文件2: PR 自动代码审查 — PR 创建/更新时自动运行
+name: Claude 自动审查
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  auto-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
+          ANTHROPIC_API_KEY: PLACEHOLDER_API_KEY
+        with:
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR TITLE: ${{ github.event.pull_request.title }}
+
+            请审查这个 PR，重点关注：
+            - 代码质量和最佳实践
+            - 潜在 bug 和逻辑问题
+            - 安全风险
+            - 性能影响
+            - 是否有遗漏的测试
+
+            用中文回复。对具体代码问题使用 inline comment，整体反馈用 PR comment。
+
+          claude_args: |
+            --model deepseek-v4-flash
+            --max-turns 15
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"

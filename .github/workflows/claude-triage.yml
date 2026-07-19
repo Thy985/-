@@ -1,0 +1,47 @@
+# 文件3: Issue 自动分类 — 新 Issue 创建时自动打标签
+name: Claude Issue 分类
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+  id-token: write
+
+jobs:
+  auto-triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
+          ANTHROPIC_API_KEY: PLACEHOLDER_API_KEY
+        with:
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE NUMBER: ${{ github.event.issue.number }}
+
+            分析这个 Issue，根据内容自动打标签。
+
+            请使用 gh CLI 操作：
+            1. 读取 Issue 内容: gh issue view ${{ github.event.issue.number }}
+            2. 根据内容添加合适的标签: gh issue edit ${{ github.event.issue.number }} --add-label "xxx"
+
+            可选标签：
+            - bug: 报告 bug
+            - enhancement: 功能建议
+            - documentation: 文档相关
+            - question: 提问
+            - help wanted: 需要帮助
+            - good first issue: 适合新手
+
+            如果没有合适的标签，添加 "needs-triage"。
+
+          claude_args: |
+            --model deepseek-v4-flash
+            --max-turns 5
+            --allowedTools "Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh label list:*)"
