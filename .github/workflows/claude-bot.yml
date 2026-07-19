@@ -14,20 +14,23 @@ permissions:
 jobs:
   ai-task:
     runs-on: ubuntu-latest
-    # 仅评论包含@claude才触发
     if: contains(github.event.comment.body, '@claude')
     steps:
-      - name: 拉取代码
+      - name: 拉取完整仓库代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 调用Claude/兼容第三方模型
+      - name: 调用第三方兼容Claude接口
         uses: anthropics/claude-code-action@v1
         env:
-          # 如果你用第三方中转兼容接口，填这两行
-          ANTHROPIC_BASE_URL: "https://token-plan-cn.xiaomimimo.com/anthropic"
-          ANTHROPIC_AUTH_TOKEN: ${{ tp-cli4ve1z2qbu8ozifh1whfenzrxgoyplslxnkkbhpxionx7e }}
+          # 替换为你的中转API地址
+          ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
+          # 仓库Secret命名 MODEL_API_KEY，填入第三方平台key
+          ANTHROPIC_AUTH_TOKEN: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93}}
         with:
-          github_token: ${{ tp-cli4ve1z2qbu8ozifh1whfenzrxgoyplslxnkkbhpxionx7e }}
-          model: mimo-v2.5
+          # 中转模式必须删除本行！！冲突会直接工作流失效
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93 }}
+          # 修改为服务商提供的模型名称
+          model: deepseek-v4-flash
