@@ -26,7 +26,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         env:
           ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
-          ANTHROPIC_API_KEY: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93 }}
+          ANTHROPIC_API_KEY: sk-7ca61728d7b54f4ab8d0cc4ab8b66e93
         with:
-          github_token: ${{ sk-7ca61728d7b54f4ab8d0cc4ab8b66e93 }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           model: deepseek-v4-flash
