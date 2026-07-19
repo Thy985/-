@@ -1,0 +1,33 @@
+name: PR @claude 自动执行任务
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  ai-task:
+    runs-on: ubuntu-latest
+    # 仅评论包含@claude才触发
+    if: contains(github.event.comment.body, '@claude')
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 调用Claude/兼容第三方模型
+        uses: anthropics/claude-code-action@v1
+        env:
+          # 如果你用第三方中转兼容接口，填这两行
+          ANTHROPIC_BASE_URL: "https://token-plan-cn.xiaomimimo.com/anthropic"
+          ANTHROPIC_AUTH_TOKEN: ${{ tp-cli4ve1z2qbu8ozifh1whfenzrxgoyplslxnkkbhpxionx7e }}
+        with:
+          github_token: ${{ tp-cli4ve1z2qbu8ozifh1whfenzrxgoyplslxnkkbhpxionx7e }}
+          model: mimo-v2.5
